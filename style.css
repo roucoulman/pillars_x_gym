@@ -1,0 +1,132 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+  background-color: #1c1c1e; /* Fond sombre style iOS */
+  color: #ffffff;
+  min-height: 100vh;
+  padding: env(safe-area-inset-top) 16px env(safe-area-inset-bottom) 16px;
+}
+
+header {
+  padding: 20px 0;
+  text-align: center;
+}
+
+header h1 {
+  font-size: 30px;
+  font-weight: 700;
+}
+
+/* Grille de 2 colonnes */
+.grid-muscles {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/* Style d'un carré de muscle */
+.card {
+  background-color: #2c2c2e;
+  border-radius: 16px;
+  padding: 12px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: transform 0.1s ease, background-color 0.2s ease;
+  border: 2px solid transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.card:active {
+  transform: scale(0.96);
+}
+
+.card .icon-img {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  margin-bottom: 4px;
+}
+
+.card .name {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.card .status {
+  font-size: 12px;
+  color: #8e8e93;
+}
+
+/* État Verrouillé / En récupération */
+.card.locked {
+  background-color: #1a0f0f;
+  border-color: #ff3b30; /* Rouge iOS */
+}
+
+.card.locked .status {
+  color: #ff3b30;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+/* --- NOUVEAUX STYLES POUR L'ANIMATION --- */
+
+/* Style quand on est en train d'appuyer pour déverrouiller (tremblement) */
+.card.locked.delocking {
+  animation: shake 0.3s infinite linear;
+  background-color: #3a1a1a; /* Un peu plus clair pendant l'appui */
+}
+
+/* Style de l'animation de succès lors du déverrouillage */
+.card.unlock-success {
+  animation: popOut 0.4s ease-out;
+}
+
+/* Keyframes : Tremblement */
+@keyframes shake {
+  0% { transform: translate(1px, 1px) rotate(0deg); }
+  10% { transform: translate(-1px, -2px) rotate(-1deg); }
+  20% { transform: translate(-3px, 0px) rotate(1deg); }
+  30% { transform: translate(3px, 2px) rotate(0deg); }
+  40% { transform: translate(1px, -1px) rotate(1deg); }
+  50% { transform: translate(-1px, 2px) rotate(-1deg); }
+  60% { transform: translate(-3px, 1px) rotate(0deg); }
+  70% { transform: translate(3px, 1px) rotate(-1deg); }
+  80% { transform: translate(-1px, -1px) rotate(1deg); }
+  90% { transform: translate(1px, 2px) rotate(0deg); }
+  100% { transform: translate(1px, -2px) rotate(-1deg); }
+}
+
+/* Keyframes : Pop-out de succès (grossit et redevient normal) */
+@keyframes popOut {
+  0% {
+    transform: scale(1);
+    background-color: #ff3b30; /* Rouge vif au départ */
+    box-shadow: 0 0 20px rgba(255, 59, 48, 0.7);
+  }
+  50% {
+    transform: scale(1.15); /* Grossit */
+    background-color: #34c759; /* Vert iOS */
+    box-shadow: 0 0 30px rgba(52, 199, 89, 0.5);
+  }
+  100% {
+    transform: scale(1);
+    background-color: #2c2c2e; /* Revient au gris normal */
+    box-shadow: 0 0 0px rgba(52, 199, 89, 0);
+  }
+}
