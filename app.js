@@ -16,7 +16,7 @@ const muscles = [
 ];
 
 const ICONE_CADENAS = "public/cadenas.png";
-const DUREE_RECUP_MS = 72; // 72h = 72 * 60 * 60 * 1000;
+const DUREE_RECUP_MS = 1000; // 72h = 72 * 60 * 60 * 1000;
 const TEMPS_APPUI_LONG = 500; 
 
 const grid = document.getElementById('grid');
