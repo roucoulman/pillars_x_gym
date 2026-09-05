@@ -89,9 +89,13 @@ header h1 {
 
 /* Style quand on est en train d'appuyer pour déverrouiller (tremblement) */
 .card.locked.delocking {
-  animation: shake 0.3s infinite linear;
-  background-color: #3a1a1a; /* Un peu plus clair pendant l'appui */
+  /* On applique deux animations : le tremblement et la transition de couleur */
+  animation: 
+    shake 0.3s infinite linear,
+    colorTransition 1.5s forwards ease-in-out; /* Durée du passage de A à B */
 }
+
+
 
 /* Style de l'animation de succès lors du déverrouillage */
 .card.unlock-success {
@@ -131,6 +135,16 @@ header h1 {
     box-shadow: 0 0 0px rgba(52, 199, 89, 0);
   }
 }
+
+@keyframes colorTransition {
+  0% {
+    background-color: #1a1a1a; /* Couleur A (Départ) */
+  }
+  100% {
+    background-color: #3a1a1a; /* Couleur B (Arrivée) */
+  }
+}
+
 
 /* 1. Espace de sécurité en bas de la page */
 body {
