@@ -31,6 +31,7 @@ header h1 {
   gap: 16px;
   max-width: 500px;
   margin: 0 auto;
+  
 }
 
 /* Style d'un carré de muscle */
@@ -129,4 +130,51 @@ header h1 {
     background-color: #2c2c2e; /* Revient au gris normal */
     box-shadow: 0 0 0px rgba(52, 199, 89, 0);
   }
+}
+
+/* 1. Espace de sécurité en bas de la page */
+body {
+  margin: 0;
+  /* Hauteur du menu (60px) + marge de sécurité iOS */
+  padding-bottom: calc(70px + env(safe-area-inset-bottom));
+}
+
+/* 2. Barre de navigation en bas */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background-color: #1e1e1e;
+  border-top: 1px solid #333;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 1000; /* Reste au-dessus des cartes */
+  
+  /* Support des écrans avec barre d'accueil (ex: iPhone récents) */
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* 3. Style des boutons du menu */
+.nav-item {
+  background: none;
+  border: none;
+  color: #888;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 0.75rem;
+  cursor: pointer;
+  flex: 1;
+}
+
+.nav-item .icon {
+  font-size: 1.2rem;
+  margin-bottom: 2px;
+}
+
+.nav-item.active {
+  color: #007bff; /* Couleur d'accentuation */
 }

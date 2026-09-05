@@ -16,7 +16,9 @@ const muscles = [
 ];
 
 const ICONE_CADENAS = "public/cadenas.png";
-const DUREE_RECUP_MS = 72 * 60 * 60 * 1000; // 72h
+const DUREE_RECUP_H = 72;
+
+; // 72h
 const TEMPS_APPUI_LONG = 300; 
 
 const grid = document.getElementById('grid');
@@ -94,7 +96,7 @@ function afficherGrille() {
 }
 
 function verrouillerMuscle(id) {
-  timers[id] = Date.now() + DUREE_RECUP_MS;
+  timers[id] = Date.now() + DUREE_RECUP_H* 60 * 60 * 1000;
   sauvegarderEtRendre(id);
 }
 
