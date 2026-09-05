@@ -1,3 +1,4 @@
+/* --- 1. RESET & BASE --- */
 * {
   margin: 0;
   padding: 0;
@@ -11,7 +12,7 @@ body {
   background-color: #1c1c1e; /* Fond sombre style iOS */
   color: #ffffff;
   min-height: 100vh;
-  padding: env(safe-area-inset-top) 16px env(safe-area-inset-bottom) 16px;
+  padding: env(safe-area-inset-top) 16px calc(70px + env(safe-area-inset-bottom)) 16px;
 }
 
 header {
@@ -24,54 +25,69 @@ header h1 {
   font-weight: 700;
 }
 
-/* Grille de 2 colonnes */
+/* --- 2. GRILLE DE CARTE --- */
 .grid-muscles {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 16px;
   max-width: 500px;
   margin: 0 auto;
-  
 }
 
-/* Style d'un carré de muscle */
+/* --- 3. STYLE FIXE DE LA CARTE --- */
 .card {
   background-color: #2c2c2e;
   border-radius: 16px;
-  padding: 12px 12px;
+  padding: 12px 6px;
+  
+  /* Dimensions et alignement stricts */
+  height: 135px; /* Hauteur fixe pour empêcher le changement de taille au clic */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 4px;
+  
   cursor: pointer;
   transition: transform 0.1s ease, background-color 0.2s ease;
   border: 2px solid transparent;
+  
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
+  overflow: hidden;
 }
 
 .card:active {
   transform: scale(0.96);
 }
 
+/* Normalisation des images/icônes */
 .card .icon-img {
-  width: 60px;
-  height: 60px;
+  width: 52px;
+  height: 52px;
   object-fit: contain;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
+/* Typographie et sécurité anti-débordement */
 .card .name {
-  font-size: 16px;
+  font-size: 10px;
   font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .card .status {
   font-size: 12px;
   color: #8e8e93;
+  font-variant-numeric: tabular-nums; /* Empêche le saut des chiffres du timer */
 }
+
+/* --- 4. ÉTATS DE LA CARTE --- */
 
 /* État Verrouillé / En récupération */
 .card.locked {
@@ -82,27 +98,22 @@ header h1 {
 .card.locked .status {
   color: #ff3b30;
   font-weight: 700;
-  font-size: 14px;
+  font-size: 13px;
 }
 
-/* --- NOUVEAUX STYLES POUR L'ANIMATION --- */
-
-/* Style quand on est en train d'appuyer pour déverrouiller (tremblement) */
+/* Animation lors de l'appui long */
 .card.locked.delocking {
-  /* On applique deux animations : le tremblement et la transition de couleur */
   animation: 
     shake 0.3s infinite linear,
-    colorTransition 1.5s forwards ease-in-out; /* Durée du passage de A à B */
+    colorTransition 1.5s forwards ease-in-out;
 }
 
-
-
-/* Style de l'animation de succès lors du déverrouillage */
+/* Animation de succès au déverrouillage */
 .card.unlock-success {
   animation: popOut 0.4s ease-out;
 }
 
-/* Keyframes : Tremblement */
+/* --- 5. KEYFRAMES / ANIMATIONS --- */
 @keyframes shake {
   0% { transform: translate(1px, 1px) rotate(0deg); }
   10% { transform: translate(-1px, -2px) rotate(-1deg); }
@@ -117,43 +128,30 @@ header h1 {
   100% { transform: translate(1px, -2px) rotate(-1deg); }
 }
 
-/* Keyframes : Pop-out de succès (grossit et redevient normal) */
 @keyframes popOut {
   0% {
     transform: scale(1);
-    background-color: #ff3b30; /* Rouge vif au départ */
+    background-color: #ff3b30;
     box-shadow: 0 0 20px rgba(255, 59, 48, 0.7);
   }
   50% {
-    transform: scale(1.15); /* Grossit */
-    background-color: #34c759; /* Vert iOS */
+    transform: scale(1.15);
+    background-color: #34c759;
     box-shadow: 0 0 30px rgba(52, 199, 89, 0.5);
   }
   100% {
     transform: scale(1);
-    background-color: #2c2c2e; /* Revient au gris normal */
+    background-color: #2c2c2e;
     box-shadow: 0 0 0px rgba(52, 199, 89, 0);
   }
 }
 
 @keyframes colorTransition {
-  0% {
-    background-color: #1a1a1a; /* Couleur A (Départ) */
-  }
-  100% {
-    background-color: #3a1a1a; /* Couleur B (Arrivée) */
-  }
+  0% { background-color: #1a1a1a; }
+  100% { background-color: #3a1a1a; }
 }
 
-
-/* 1. Espace de sécurité en bas de la page */
-body {
-  margin: 0;
-  /* Hauteur du menu (60px) + marge de sécurité iOS */
-  padding-bottom: calc(70px + env(safe-area-inset-bottom));
-}
-
-/* 2. Barre de navigation en bas */
+/* --- 6. BARRE DE NAVIGATION INFÉRIEURE --- */
 .bottom-nav {
   position: fixed;
   bottom: 0;
@@ -165,13 +163,10 @@ body {
   display: flex;
   justify-content: space-around;
   align-items: center;
-  z-index: 1000; /* Reste au-dessus des cartes */
-  
-  /* Support des écrans avec barre d'accueil (ex: iPhone récents) */
+  z-index: 1000;
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* 3. Style des boutons du menu */
 .nav-item {
   background: none;
   border: none;
@@ -190,5 +185,5 @@ body {
 }
 
 .nav-item.active {
-  color: #007bff; /* Couleur d'accentuation */
+  color: #007bff;
 }
