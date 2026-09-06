@@ -1,3 +1,11 @@
+// app.js
+import { 
+  initialiserSQLite, 
+  chargerTimersSQL, 
+  verrouillerMuscleSQL, 
+  deverrouillerMuscleSQL 
+} from './db.js';
+
 const muscles = [
   { id: 'pecs', name: 'Pectoraux', icon: "public/pecs.png" },
   { id: 'epaules', name: 'Épaules', icon: "public/epaule.png" },
@@ -16,80 +24,46 @@ const muscles = [
 ];
 
 const ICONE_CADENAS = "public/cadenas.png";
-const DUREE_RECUP_MS = 72 * 60 * 60 * 1000; // 72h = 72 * 60 * 60 * 1000;
+const DUREE_RECUP_MS = 72 * 60 * 60 * 1000; // 72h
 const TEMPS_APPUI_LONG = 500; 
 
 const grid = document.getElementById('grid');
-
-let db = null; // Base SQLite WASM
 let timers = {};
 
-// --- 1. INITIALISATION DE SQLITE WASM ---
-async function initialiserSQLite() {
-  const initSqlJs = window.initSqlJs;
-  const SQL = await initSqlJs({
-    locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`
-  });
-
-  const savedDb = localStorage.getItem("sqlite_recup_db");
-  if (savedDb) {
-    const uInt8Array = new Uint8Array(JSON.parse(savedDb));
-    db = new SQL.Database(uInt8Array);
-  } else {
-    db = new SQL.Database();
-  }
-
-  db.run(`
-    CREATE TABLE IF NOT EXISTS timers (
-      muscle_id TEXT PRIMARY KEY,
-      fin_timer INTEGER NOT NULL
-    );
-  `);
-
-  sauvegarderBDDEnLocal();
-  chargerDonneesEtAfficher();
-}
-
-function sauvegarderBDDEnLocal() {
-  if (!db) return;
-  const data = db.export();
-  const array = Array.from(data);
-  localStorage.setItem("sqlite_recup_db", JSON.stringify(array));
-}
-
-function chargerDonneesEtAfficher() {
-  timers = {};
-  const res = db.exec("SELECT muscle_id, fin_timer FROM timers;");
-  
-  if (res.length > 0) {
-    const rows = res[0].values;
-    rows.forEach(row => {
-      const [muscle_id, fin_timer] = row;
-      timers[muscle_id] = fin_timer;
-    });
-  }
-
+// Initialisation au démarrage
+async function init() {
+  await initialiserSQLite();
+  timers = chargerTimersSQL();
   afficherGrille();
 }
 
-function verrouillerMuscleSQL(id, finTimer) {
+function verrouillerMuscle(id) {
+  const finTimer = Date.now() + DUREE_RECUP_MS;
   timers[id] = finTimer;
-  const stmt = db.prepare("INSERT OR REPLACE INTO timers (muscle_id, fin_timer) VALUES (?, ?);");
-  stmt.run([id, finTimer]);
-  stmt.free();
-  sauvegarderBDDEnLocal();
+  verrouillerMuscleSQL(id, finTimer);
+  
+  const muscle = muscles.find(m => m.id === id);
+  if (muscle) mettreAJourCarte(muscle);
 }
 
-function deverrouillerMuscleSQL(id) {
+function deverrouillerMuscle(id, card) {
   delete timers[id];
-  const stmt = db.prepare("DELETE FROM timers WHERE muscle_id = ?;");
-  stmt.run([id]);
-  stmt.free();
-  sauvegarderBDDEnLocal();
+  deverrouillerMuscleSQL(id);
+  
+  if (card) {
+    card.classList.add('unlock-success');
+    setTimeout(() => card.classList.remove('unlock-success'), 400);
+  }
+
+  const muscle = muscles.find(m => m.id === id);
+  if (muscle) mettreAJourCarte(muscle);
+  
+  if (navigator.vibrate) navigator.vibrate(50);
 }
 
-// --- 2. GESTION ROBUSTE DES ÉVÉNEMENTS (POINTER EVENTS) ---
+// --- AFFICHAGE DE LA GRILLE ---
 function afficherGrille() {
+  if (!grid) return;
   grid.innerHTML = '';
 
   muscles.forEach(muscle => {
@@ -100,12 +74,10 @@ function afficherGrille() {
     let appuiTimer = null;
     let appuiLongValide = false;
 
-    const demarrerAppui = (e) => {
-      // Empêche le menu contextuel natif du téléphone lors de l'appui long
+    const demarrerAppui = () => {
       appuiLongValide = false;
       const maintenant = Date.now();
 
-      // Si le muscle est verrouillé, préparer le déverrouillage
       if (timers[muscle.id] && timers[muscle.id] > maintenant) {
         card.classList.add('delocking');
 
@@ -123,8 +95,7 @@ function afficherGrille() {
       card.classList.remove('delocking');
     };
 
-    const gererClic = (e) => {
-      // Si l'appui long a déclenché le déverrouillage, ignorer le clic simple
+    const gererClic = () => {
       if (appuiLongValide) {
         appuiLongValide = false;
         return;
@@ -136,16 +107,15 @@ function afficherGrille() {
       }
     };
 
-    // Utilisation des Pointer Events (Unified Mouse & Touch API)
+    // Événements tactiles et pointeur
     card.addEventListener('pointerdown', demarrerAppui);
     card.addEventListener('pointerup', annulerAppui);
     card.addEventListener('pointercancel', annulerAppui);
     card.addEventListener('pointerleave', annulerAppui);
 
-    // Empêcher la sélection/menu contextuel au clic long sur mobile
+    // Empêcher le menu contextuel natif lors d'un appui long
     card.addEventListener('contextmenu', (e) => e.preventDefault());
 
-    // Clic simple pour verrouiller
     card.onclick = gererClic;
 
     grid.appendChild(card);
@@ -153,31 +123,7 @@ function afficherGrille() {
   });
 }
 
-// --- 3. ACTIONS & TIMERS ---
-function verrouillerMuscle(id) {
-  const finTimer = Date.now() + DUREE_RECUP_MS;
-  verrouillerMuscleSQL(id, finTimer);
-  
-  const muscle = muscles.find(m => m.id === id);
-  if (muscle) mettreAJourCarte(muscle);
-}
-
-function deverrouillerMuscle(id, card) {
-  deverrouillerMuscleSQL(id);
-  
-  if (card) {
-    card.classList.add('unlock-success');
-    setTimeout(() => {
-      card.classList.remove('unlock-success');
-    }, 400);
-  }
-
-  const muscle = muscles.find(m => m.id === id);
-  if (muscle) mettreAJourCarte(muscle);
-  
-  if (navigator.vibrate) navigator.vibrate(50);
-}
-
+// --- MISE À JOUR D'UNE CARTE ---
 function mettreAJourCarte(muscle) {
   const card = document.getElementById(`card-${muscle.id}`);
   if (!card) return;
@@ -202,6 +148,7 @@ function mettreAJourCarte(muscle) {
   }
 }
 
+// --- FORMATAGE DU TEMPS ---
 function formaterTemps(ms) {
   const totalSecondes = Math.floor(ms / 1000);
   const heures = Math.floor(totalSecondes / 3600);
@@ -211,10 +158,10 @@ function formaterTemps(ms) {
   return `${heures}h ${minutes.toString().padStart(2, '0')}m ${secondes.toString().padStart(2, '0')}s`;
 }
 
-// Rafraîchissement automatique
+// Rafraîchissement automatique chaque seconde
 setInterval(() => {
   muscles.forEach(muscle => mettreAJourCarte(muscle));
 }, 1000);
 
-// Lancement
-initialiserSQLite();
+// Démarrage de l'application
+init();
