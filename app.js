@@ -7,23 +7,23 @@ import {
 } from './db.js';
 
 const muscles = [
-  { id: 'pecs', name: 'Pectoraux', icon: "public/pecs.png" },
-  { id: 'epaules', name: 'Épaules', icon: "public/epaule.png" },
-  { id: 'reardelts', name: "Arrière épaule", icon: "public/reardelts.png" },
-  { id: 'biceps', name: 'Biceps', icon: "public/biceps.png" },
-  { id: 'dorsaux', name: 'Dorsaux', icon: "public/dorsaux.png" },
-  { id: 'trapeze', name: 'Trapèze', icon: "public/trapeze.png" },
-  { id: 'triceps', name: 'Triceps', icon: "public/triceps.png" },
-  { id: 'quadriceps', name: 'Quadriceps', icon: "public/quadriceps.png" },
-  { id: 'ischios', name: 'Ischios', icon: "public/ischios.png" },
-  { id: 'fessiers', name: 'Fessiers', icon: "public/fessiers.png" },
-  { id: 'mollets', name: 'Mollets', icon: "public/mollets.png" },
-  { id: 'adducteur', name: 'Adducteur', icon: "public/adducteur.png" },
-  { id: 'avant bras', name: 'Avant bras', icon: "public/avant-bras.png" },
-  { id: 'abs', name: 'Abdos', icon: "public/abdos.png" }
+  { id: 'pecs', name: 'Pectoraux', icon: "public/muscles/pecs.png" },
+  { id: 'epaules', name: 'Épaules', icon: "public/muscles/epaule.png" },
+  { id: 'reardelts', name: "Arrière épaule", icon: "public/muscles/reardelts.png" },
+  { id: 'biceps', name: 'Biceps', icon: "public/muscles/biceps.png" },
+  { id: 'dorsaux', name: 'Dorsaux', icon: "public/muscles/dorsaux.png" },
+  { id: 'trapeze', name: 'Trapèze', icon: "public/muscles/trapeze.png" },
+  { id: 'triceps', name: 'Triceps', icon: "public/muscles/triceps.png" },
+  { id: 'quadriceps', name: 'Quadriceps', icon: "public/muscles/quadriceps.png" },
+  { id: 'ischios', name: 'Ischios', icon: "public/muscles/ischios.png" },
+  { id: 'fessiers', name: 'Fessiers', icon: "public/muscles/fessiers.png" },
+  { id: 'mollets', name: 'Mollets', icon: "public/muscles/mollets.png" },
+  { id: 'adducteur', name: 'Adducteur', icon: "public/muscles/adducteur.png" },
+  { id: 'avant bras', name: 'Avant bras', icon: "public/muscles/avant-bras.png" },
+  { id: 'abs', name: 'Abdos', icon: "public/muscles/abdos.png" }
 ];
 
-const ICONE_CADENAS = "public/cadenas.png";
+const ICONE_CADENAS = "public/icons/cadenas.png";
 const DUREE_RECUP_MS = 72 * 60 * 60 * 1000; // 72h
 const TEMPS_APPUI_LONG = 500; 
 
