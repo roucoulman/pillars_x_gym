@@ -1,0 +1,41 @@
+/* --- 1. RESET & BASE --- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+  background-color: #1c1c1e; /* Fond sombre style iOS */
+  color: #ffffff;
+  min-height: 100vh;
+  padding: env(safe-area-inset-top) 16px calc(70px + env(safe-area-inset-bottom)) 16px;
+}
+
+header {
+  padding: 20px 0;
+  text-align: center;
+}
+
+header h1 {
+  font-size: 30px;
+  font-weight: 700;
+}
+
+.modifBouton {
+    font-size: 1.5rem;
+    padding: 12px 20px;
+    cursor: pointer;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.modifBouton:hover {
+    background-color: #e2e6ea;
+    border-color: #adb5bd;
+}
