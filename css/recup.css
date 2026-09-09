@@ -31,6 +31,11 @@
   overflow: hidden;
 }
 
+.card {
+  touch-action: none; /* Empêche le scroll du navigateur d'annuler l'appui long */
+  user-select: none;  /* Empêche la sélection de texte */
+}
+
 .card:active {
   transform: scale(0.96);
 }

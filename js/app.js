@@ -1,53 +1,39 @@
 // app.js
 import { 
   initialiserSQLite, 
-  chargerTimersSQL, 
+  chargerMusclesEtTimersSQL, 
   verrouillerMuscleSQL, 
   deverrouillerMuscleSQL 
 } from './db.js';
-
-const muscles = [
-  { id: 'pecs', name: 'Pectoraux', icon: "public/muscles/pecs.png" },
-  { id: 'epaules', name: 'Épaules', icon: "public/muscles/epaule.png" },
-  { id: 'reardelts', name: "Arrière épaule", icon: "public/muscles/reardelts.png" },
-  { id: 'biceps', name: 'Biceps', icon: "public/muscles/biceps.png" },
-  { id: 'dorsaux', name: 'Dorsaux', icon: "public/muscles/dorsaux.png" },
-  { id: 'trapeze', name: 'Trapèze', icon: "public/muscles/trapeze.png" },
-  { id: 'triceps', name: 'Triceps', icon: "public/muscles/triceps.png" },
-  { id: 'quadriceps', name: 'Quadriceps', icon: "public/muscles/quadriceps.png" },
-  { id: 'ischios', name: 'Ischios', icon: "public/muscles/ischios.png" },
-  { id: 'fessiers', name: 'Fessiers', icon: "public/muscles/fessiers.png" },
-  { id: 'mollets', name: 'Mollets', icon: "public/muscles/mollets.png" },
-  { id: 'adducteur', name: 'Adducteur', icon: "public/muscles/adducteur.png" },
-  { id: 'avant bras', name: 'Avant bras', icon: "public/muscles/avant-bras.png" },
-  { id: 'abs', name: 'Abdos', icon: "public/muscles/abdos.png" }
-];
 
 const ICONE_CADENAS = "public/icons/cadenas.png";
 const DUREE_RECUP_MS = 72 * 60 * 60 * 1000; // 72h
 const TEMPS_APPUI_LONG = 500; 
 
 const grid = document.getElementById('grid');
-let timers = {};
 
-// Initialisation au démarrage
+let listeMuscles = [];
+
 async function init() {
   await initialiserSQLite();
-  timers = chargerTimersSQL();
+  rafraichirDonnees();
   afficherGrille();
+}
+
+function rafraichirDonnees() {
+  listeMuscles = chargerMusclesEtTimersSQL();
 }
 
 function verrouillerMuscle(id) {
   const finTimer = Date.now() + DUREE_RECUP_MS;
-  timers[id] = finTimer;
   verrouillerMuscleSQL(id, finTimer);
   
-  const muscle = muscles.find(m => m.id === id);
+  rafraichirDonnees();
+  const muscle = listeMuscles.find(m => m.id === id);
   if (muscle) mettreAJourCarte(muscle);
 }
 
 function deverrouillerMuscle(id, card) {
-  delete timers[id];
   deverrouillerMuscleSQL(id);
   
   if (card) {
@@ -55,7 +41,8 @@ function deverrouillerMuscle(id, card) {
     setTimeout(() => card.classList.remove('unlock-success'), 400);
   }
 
-  const muscle = muscles.find(m => m.id === id);
+  rafraichirDonnees();
+  const muscle = listeMuscles.find(m => m.id === id);
   if (muscle) mettreAJourCarte(muscle);
   
   if (navigator.vibrate) navigator.vibrate(50);
@@ -66,7 +53,7 @@ function afficherGrille() {
   if (!grid) return;
   grid.innerHTML = '';
 
-  muscles.forEach(muscle => {
+  listeMuscles.forEach(muscle => {
     const card = document.createElement('div');
     card.classList.add('card');
     card.id = `card-${muscle.id}`;
@@ -78,7 +65,7 @@ function afficherGrille() {
       appuiLongValide = false;
       const maintenant = Date.now();
 
-      if (timers[muscle.id] && timers[muscle.id] > maintenant) {
+      if (muscle.finTimer && muscle.finTimer > maintenant) {
         card.classList.add('delocking');
 
         clearTimeout(appuiTimer);
@@ -95,28 +82,30 @@ function afficherGrille() {
       card.classList.remove('delocking');
     };
 
-    const gererClic = () => {
+    const gererClic = (e) => {
+      // Si un déverrouillage vient de s'exécuter sur l'appui long, on ne fait rien
       if (appuiLongValide) {
         appuiLongValide = false;
         return;
       }
 
       const maintenant = Date.now();
-      if (!timers[muscle.id] || timers[muscle.id] <= maintenant) {
+      if (!muscle.finTimer || muscle.finTimer <= maintenant) {
         verrouillerMuscle(muscle.id);
       }
     };
 
-    // Événements tactiles et pointeur
+    // Événements de pointage (souris + tactile)
     card.addEventListener('pointerdown', demarrerAppui);
     card.addEventListener('pointerup', annulerAppui);
     card.addEventListener('pointercancel', annulerAppui);
     card.addEventListener('pointerleave', annulerAppui);
 
-    // Empêcher le menu contextuel natif lors d'un appui long
+    // Empêche le menu contextuel natif lors d'un appui long
     card.addEventListener('contextmenu', (e) => e.preventDefault());
-
-    card.onclick = gererClic;
+    
+    // Événement de clic unique
+    card.addEventListener('click', gererClic);
 
     grid.appendChild(card);
     mettreAJourCarte(muscle);
@@ -128,11 +117,10 @@ function mettreAJourCarte(muscle) {
   const card = document.getElementById(`card-${muscle.id}`);
   if (!card) return;
 
-  const finTimer = timers[muscle.id];
   const maintenant = Date.now();
 
-  if (finTimer && finTimer > maintenant) {
-    const tempsRestantMs = finTimer - maintenant;
+  if (muscle.finTimer && muscle.finTimer > maintenant) {
+    const tempsRestantMs = muscle.finTimer - maintenant;
     card.classList.add('locked');
     card.innerHTML = `
       <img src="${ICONE_CADENAS}" class="icon-img" alt="Verrouillé" />
@@ -158,10 +146,9 @@ function formaterTemps(ms) {
   return `${heures}h ${minutes.toString().padStart(2, '0')}m ${secondes.toString().padStart(2, '0')}s`;
 }
 
-// Rafraîchissement automatique chaque seconde
+// Rafraîchissement chaque seconde
 setInterval(() => {
-  muscles.forEach(muscle => mettreAJourCarte(muscle));
+  listeMuscles.forEach(muscle => mettreAJourCarte(muscle));
 }, 1000);
 
-// Démarrage de l'application
 init();
