@@ -43,7 +43,6 @@ export async function initialiserSQLite() {
 
   // Création des tables (sans DROP TABLE)
   db.run(`
-    DROP TABLE muscles ;
     CREATE TABLE IF NOT EXISTS muscles (
       id TEXT PRIMARY KEY,
       name TEXT NOT NULL,

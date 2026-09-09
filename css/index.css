@@ -35,7 +35,7 @@ body::before {
   background-image: url('../public/bodybuilder.png');
   background-repeat: no-repeat;
   background-position: center center;
-  background-size: 80% auto; /* Ajustez la taille ici (ex: 50%, 300px, etc.) */
+  background-size: 90% auto; /* Ajustez la taille ici (ex: 50%, 300px, etc.) */
   
   opacity: 0.3; /* Ajustez l'opacité ici (de 0.0 à 1.0) */
   z-index: -1;  /* Place l'image derrière le contenu */
