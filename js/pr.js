@@ -19,8 +19,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 showCancelButton: true,
                 confirmButtonText: 'Valider',
                 cancelButtonText: 'Annuler',
-                confirmButtonColor: '#22DB18',
-                cancelButtonColor: '#E00F09',
+                confirmButtonColor: '#1D420B',
+                cancelButtonColor: '#420B0B',
+                color: '#fff'
             });
             if (valeurEntree === null) return;
             const nouvelleValeur = parseInt(valeurEntree, 10);
