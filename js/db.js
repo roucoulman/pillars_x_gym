@@ -48,15 +48,19 @@ export async function initialiserSQLite() {
       name TEXT NOT NULL,
       icon TEXT NOT NULL
     );
-  `);
 
-  // 2. Table des timers (simplifiée sans doublons de colonnes)
-  db.run(`
     CREATE TABLE IF NOT EXISTS timers (
       muscle_id TEXT PRIMARY KEY,
       fin_timer INTEGER NOT NULL,
       FOREIGN KEY(muscle_id) REFERENCES muscles(id)
     );
+
+    CREATE TABLE IF NOT EXISTS PR ( 
+          exercice TEXT PRIMARY KEY,
+          valeur INTEGER NOT NULL,
+          date DATE
+    )
+
   `);
 
   // 3. Insertion des muscles par défaut si la table est vide
