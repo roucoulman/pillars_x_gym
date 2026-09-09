@@ -7,7 +7,6 @@ import {
 } from './db.js';
 
 const ICONE_CADENAS = "public/icons/cadenas.png";
-const DUREE_RECUP_MS = 72 * 60 * 60 * 1000; // 72h
 const TEMPS_APPUI_LONG = 500; 
 
 const grid = document.getElementById('grid');
@@ -25,12 +24,18 @@ function rafraichirDonnees() {
 }
 
 function verrouillerMuscle(id) {
-  const finTimer = Date.now() + DUREE_RECUP_MS;
+  const muscle = listeMuscles.find(m => m.id === id);
+  if (!muscle) return;
+
+  // Calcul dynamique selon le temps_recup propre au muscle (en heures)
+  const dureeMs = (muscle.temps_recup || 48) * 60 * 60 * 1000;
+  const finTimer = Date.now() + dureeMs;
+  
   verrouillerMuscleSQL(id, finTimer);
   
   rafraichirDonnees();
-  const muscle = listeMuscles.find(m => m.id === id);
-  if (muscle) mettreAJourCarte(muscle);
+  const muscleAjour = listeMuscles.find(m => m.id === id);
+  if (muscleAjour) mettreAJourCarte(muscleAjour);
 }
 
 function deverrouillerMuscle(id, card) {
@@ -42,8 +47,8 @@ function deverrouillerMuscle(id, card) {
   }
 
   rafraichirDonnees();
-  const muscle = listeMuscles.find(m => m.id === id);
-  if (muscle) mettreAJourCarte(muscle);
+  const muscleAjour = listeMuscles.find(m => m.id === id);
+  if (muscleAjour) mettreAJourCarte(muscleAjour);
   
   if (navigator.vibrate) navigator.vibrate(50);
 }
@@ -57,6 +62,13 @@ function afficherGrille() {
     const card = document.createElement('div');
     card.classList.add('card');
     card.id = `card-${muscle.id}`;
+
+    // Structure interne fixe pour éviter de re-générer le HTML et perdre les événements
+    card.innerHTML = `
+      <img src="${muscle.icon}" class="icon-img" alt="${muscle.name}" />
+      <span class="name">${muscle.name}</span>
+      <span class="status"></span>
+    `;
 
     let appuiTimer = null;
     let appuiLongValide = false;
@@ -82,8 +94,7 @@ function afficherGrille() {
       card.classList.remove('delocking');
     };
 
-    const gererClic = (e) => {
-      // Si un déverrouillage vient de s'exécuter sur l'appui long, on ne fait rien
+    const gererClic = () => {
       if (appuiLongValide) {
         appuiLongValide = false;
         return;
@@ -95,16 +106,12 @@ function afficherGrille() {
       }
     };
 
-    // Événements de pointage (souris + tactile)
+    // Événements de pointage
     card.addEventListener('pointerdown', demarrerAppui);
     card.addEventListener('pointerup', annulerAppui);
     card.addEventListener('pointercancel', annulerAppui);
     card.addEventListener('pointerleave', annulerAppui);
-
-    // Empêche le menu contextuel natif lors d'un appui long
     card.addEventListener('contextmenu', (e) => e.preventDefault());
-    
-    // Événement de clic unique
     card.addEventListener('click', gererClic);
 
     grid.appendChild(card);
@@ -117,27 +124,32 @@ function mettreAJourCarte(muscle) {
   const card = document.getElementById(`card-${muscle.id}`);
   if (!card) return;
 
+  const imgElem = card.querySelector('.icon-img');
+  const statusElem = card.querySelector('.status');
   const maintenant = Date.now();
 
   if (muscle.finTimer && muscle.finTimer > maintenant) {
     const tempsRestantMs = muscle.finTimer - maintenant;
     card.classList.add('locked');
-    card.innerHTML = `
-      <img src="${ICONE_CADENAS}" class="icon-img" alt="Verrouillé" />
-      <span class="name">${muscle.name}</span>
-      <span class="status">${formaterTemps(tempsRestantMs)}</span>
-    `;
+    
+    if (imgElem) imgElem.src = ICONE_CADENAS;
+    if (statusElem) statusElem.textContent = formaterTemps(tempsRestantMs);
   } else {
+    // Si le timer est expiré mais toujours présent en mémoire
+    if (muscle.finTimer && muscle.finTimer <= maintenant) {
+      deverrouillerMuscle(muscle.id);
+      return;
+    }
+
     card.classList.remove('locked');
-    card.innerHTML = `
-      <img src="${muscle.icon}" class="icon-img" alt="${muscle.name}" />
-      <span class="name">${muscle.name}</span>
-    `;
+    if (imgElem) imgElem.src = muscle.icon;
+    if (statusElem) statusElem.textContent = '';
   }
 }
 
 // --- FORMATAGE DU TEMPS ---
 function formaterTemps(ms) {
+  if (ms <= 0) return "0h 00m 00s";
   const totalSecondes = Math.floor(ms / 1000);
   const heures = Math.floor(totalSecondes / 3600);
   const minutes = Math.floor((totalSecondes % 3600) / 60);
