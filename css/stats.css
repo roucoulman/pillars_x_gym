@@ -1,0 +1,19 @@
+body {
+  /* Lien vers votre image */
+  background-image: url('chemin/vers/votre-image.jpg');
+
+  /* Empêche la répétition de l'image si elle est trop petite */
+  background-repeat: no-repeat;
+
+  /* Redimensionne l'image pour qu'elle couvre tout l'écran */
+  background-size: cover;
+
+  /* Centre l'image dans la fenêtre */
+  background-position: center center;
+
+  /* Fixe l'image pour qu'elle ne défile pas avec le contenu (optionnel) */
+  background-attachment: fixed;
+
+  /* Couleur de secours si l'image met du temps à charger */
+  background-color: #121212;
+}

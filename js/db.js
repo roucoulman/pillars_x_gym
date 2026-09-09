@@ -4,20 +4,20 @@ let db = null;
 
 // Données initiales pour remplir la table la première fois
 const MUSCLES_PAR_DEFAUT = [
-  { id: 'pecs', name: 'Pectoraux', icon: "public/muscles/pecs.png" },
   { id: 'epaules', name: 'Épaules', icon: "public/muscles/epaule.png" },
+  { id: 'pecs', name: 'Pectoraux', icon: "public/muscles/pecs.png" },
   { id: 'reardelts', name: "Arrière épaule", icon: "public/muscles/reardelts.png" },
-  { id: 'biceps', name: 'Biceps', icon: "public/muscles/biceps.png" },
   { id: 'dorsaux', name: 'Dorsaux', icon: "public/muscles/dorsaux.png" },
+  { id: 'abs', name: 'Abdos', icon: "public/muscles/abdos.png" },
   { id: 'trapeze', name: 'Trapèze', icon: "public/muscles/trapeze.png" },
+  { id: 'biceps', name: 'Biceps', icon: "public/muscles/biceps.png" },
   { id: 'triceps', name: 'Triceps', icon: "public/muscles/triceps.png" },
+  { id: 'avant bras', name: 'Avant bras', icon: "public/muscles/avant-bras.png" },
   { id: 'quadriceps', name: 'Quadriceps', icon: "public/muscles/quadriceps.png" },
   { id: 'ischios', name: 'Ischios', icon: "public/muscles/ischios.png" },
+  { id: 'adducteur', name: 'Adducteur', icon: "public/muscles/adducteur.png" },
   { id: 'fessiers', name: 'Fessiers', icon: "public/muscles/fessiers.png" },
   { id: 'mollets', name: 'Mollets', icon: "public/muscles/mollets.png" },
-  { id: 'adducteur', name: 'Adducteur', icon: "public/muscles/adducteur.png" },
-  { id: 'avant bras', name: 'Avant bras', icon: "public/muscles/avant-bras.png" },
-  { id: 'abs', name: 'Abdos', icon: "public/muscles/abdos.png" }
 ];
 
 export async function initialiserSQLite() {
@@ -43,20 +43,25 @@ export async function initialiserSQLite() {
 
   // 1. Table des muscles
   db.run(`
+    DROP TABLE muscles ;
     CREATE TABLE IF NOT EXISTS muscles (
       id TEXT PRIMARY KEY,
       name TEXT NOT NULL,
       icon TEXT NOT NULL
     );
-  `);
 
-  // 2. Table des timers (simplifiée sans doublons de colonnes)
-  db.run(`
     CREATE TABLE IF NOT EXISTS timers (
       muscle_id TEXT PRIMARY KEY,
       fin_timer INTEGER NOT NULL,
       FOREIGN KEY(muscle_id) REFERENCES muscles(id)
     );
+
+    CREATE TABLE IF NOT EXISTS PR ( 
+          exercice TEXT PRIMARY KEY,
+          valeur INTEGER NOT NULL,
+          date DATE
+    )
+
   `);
 
   // 3. Insertion des muscles par défaut si la table est vide
