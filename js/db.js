@@ -37,7 +37,8 @@ export async function initialiserSQLite() {
       console.error("Erreur de chargement LocalStorage, nouvelle BDD.", e);
       db = new SQL.Database();
     }
-  } else {
+  } 
+  else {
     db = new SQL.Database();
   }
 
